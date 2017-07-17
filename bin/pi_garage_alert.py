@@ -47,7 +47,7 @@ import smtplib
 import ssl
 import traceback
 from email.mime.text import MIMEText
-import multiprocessing.connection import Listener
+from multiprocessing.connection import Listener
 import threading
 import netifaces
 
