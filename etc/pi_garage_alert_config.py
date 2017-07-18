@@ -76,8 +76,7 @@ EMAIL_PRIORITY = '1'
 IFTTT_KEY = ''
 
 ##############################################################################
-# Your network Interfaces eth0, wlan0, ...
-# use ifconfig to find yours
+# use ifconfig to find your ip address or use localhost
 ##############################################################################
-NETWORK_INTERFACE = 'wlan0'
+NETWORK_IP = '192.168.1.226'
 NETWORK_PORT = '6000'

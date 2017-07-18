@@ -37,6 +37,7 @@ Learn more at http://www.richlynch.com/code/pi_garage_alert
 
 import time
 from time import strftime
+from datetime import datetime
 import subprocess
 import re
 import sys
@@ -49,7 +50,6 @@ import traceback
 from email.mime.text import MIMEText
 from multiprocessing.connection import Listener
 import threading
-import netifaces
 
 import requests
 import RPi.GPIO as GPIO
@@ -180,13 +180,16 @@ def rpi_status():
 # Trigger garage door to open or close
 ##############################################################################
 def doorTrigger():
-    ip = netifaces.ifaddresses(cfg.NETWORK_INTERFACE)[ni.AF_INET][0]['addr']
-    address = (ip, cfg.NETWORK_PORT)     # family is deduced to be 'AF_INET'
+    address = (cfg.NETWORK_IP, int(cfg.NETWORK_PORT))
     listener = Listener(address, authkey='secret password')
     conn = listener.accept()
     print 'connection accepted from', listener.last_accepted
     conn.send_bytes('door triggered')
     conn.close()
+    listener.close()
+    # Start garage door trigger thread
+    doorTriggerThread = threading.Thread(target=doorTrigger)
+    doorTriggerThread.start()
 
 ##############################################################################
 # Logging and alerts
@@ -279,7 +282,7 @@ class PiGarageAlert(object):
                 logging.basicConfig(format=log_fmt, level=log_level, filename=cfg.LOG_FILENAME)
 
             # Start garage door trigger thread
-            doorTriggerThread= threading.Thread(target=doorTrigger)
+            doorTriggerThread = threading.Thread(target=doorTrigger)
             doorTriggerThread.start()
 
             # Banner
@@ -361,7 +364,7 @@ class PiGarageAlert(object):
                                 send_alerts(self.logger, alert_senders, alert['recipients'], name, "%s has been %s for %d seconds!" % (name, state, time_in_state), state, time_in_state)
                                 alert_states[name] += 1
                         else:
-                            if timeofday >= starttime or timeofday <= endtime and time_in_state > alert['time'] and state == alert['state']:
+                            if time_of_day >= start_time or time_of_day <= end_time and time_in_state > alert['time'] and state == alert['state']:
                                 send_alerts(self.logger, alert_senders, alert['recipients'], name, "%s has been %s for %d seconds!" % (name, state, time_in_state), state, time_in_state)
                                 alert_states[name] += 1
 
