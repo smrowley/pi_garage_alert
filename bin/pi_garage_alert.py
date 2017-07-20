@@ -180,16 +180,29 @@ def rpi_status():
 # Trigger garage door to open or close
 ##############################################################################
 def doorTrigger():
+
+    # logging
+    self.logger = logging.getLogger(__name__)
+
+    # Banner
+    self.logger.info("==========================================================")
+    self.logger.info("Pi Garage Listening for Trigger")
+
     address = (cfg.NETWORK_IP, int(cfg.NETWORK_PORT))
     listener = Listener(address, authkey='secret password')
-    conn = listener.accept()
-    print 'connection accepted from', listener.last_accepted
-    conn.send_bytes('door triggered')
+
+    while True:
+        conn = listener.accept()
+        print 'connection accepted from', listener.last_accepted
+        if conn.recv_bytes == 'trigger':
+            conn.send_bytes('door triggered')
+        elif conn.recv_bytes == 'up':
+            conn.send_bytes('door up')
+        elif conn.recv_bytes == 'down':
+            conn.send_bytes('door down')
+
     conn.close()
     listener.close()
-    # Start garage door trigger thread
-    doorTriggerThread = threading.Thread(target=doorTrigger)
-    doorTriggerThread.start()
 
 ##############################################################################
 # Logging and alerts
@@ -283,6 +296,7 @@ class PiGarageAlert(object):
 
             # Start garage door trigger thread
             doorTriggerThread = threading.Thread(target=doorTrigger)
+            doorTriggerThread.setDaemon(True)
             doorTriggerThread.start()
 
             # Banner
