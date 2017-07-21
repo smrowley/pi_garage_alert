@@ -78,5 +78,5 @@ IFTTT_KEY = ''
 ##############################################################################
 # use ifconfig to find your ip address or use localhost
 ##############################################################################
-NETWORK_IP = '192.168.1.226'
+NETWORK_IP = 'localhost'
 NETWORK_PORT = '6000'

@@ -181,6 +181,9 @@ def rpi_status():
 ##############################################################################
 def doorTrigger():
 
+    for door in cfg.GARAGE_DOORS:
+        state = get_garage_door_state(door['pin'])
+
     address = (cfg.NETWORK_IP, int(cfg.NETWORK_PORT))
     listener = Listener(address, authkey='secret password')
 
@@ -191,14 +194,25 @@ def doorTrigger():
         received = conn.recv_bytes()
         response = 'unknown command'
         if received == 'trigger':
-            response == ('garage door triggered')
+            if state == 'open':
+                response == ('closing garage door')
+            else:
+                response == ('opening garage door')
         elif received == 'open':
-            response == ('garage door opening')
+            if state == 'open':
+                response == ('garage door already open')
+            else:
+                response == ('opening garage door')
         elif received == 'close':
-            response == ('garage door closing')
+            if state == 'open':
+                response == ('closing garage door')
+            else:
+                response == ('garage door alredy closed')
 
         conn.send_bytes(response)
         print 'Received command to ' + received + ' the garage door. Response was ' + response
+
+        time.sleep(1)
 
     conn.close()
     listener.close()
