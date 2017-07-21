@@ -27,7 +27,6 @@ Here is a heavily condensed quick start guide. New users are strongly encouraged
 1. Update the packages with `sudo apt-get update && sudo apt-get upgrade`, then install the dependencies:<br>
 sudo apt-get install python-setuptools python-dev libffi-dev<br>
 sudo easy_install pip<br>
-sudo pip install netifaces<br>
 sudo pip install requests<br>
 sudo pip install requests[security]<br>
 1. Optional email configuration
