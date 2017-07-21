@@ -311,11 +311,6 @@ class PiGarageAlert(object):
             self.logger.info("==========================================================")
             self.logger.info("Pi Garage Listener and Alert starting")
 
-            # Start garage door trigger thread
-            doorTriggerThread = threading.Thread(target=doorTrigger)
-            doorTriggerThread.setDaemon(True)
-            doorTriggerThread.start()
-
             # Use Raspberry Pi board pin numbers
             self.logger.info("Configuring global settings")
             GPIO.setmode(GPIO.BOARD)
@@ -324,6 +319,11 @@ class PiGarageAlert(object):
             for door in cfg.GARAGE_DOORS:
                 self.logger.info("Configuring pin %d for \"%s\"", door['pin'], door['name'])
                 GPIO.setup(door['pin'], GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+            # Start garage door trigger thread
+            doorTriggerThread = threading.Thread(target=doorTrigger)
+            doorTriggerThread.setDaemon(True)
+            doorTriggerThread.start()
 
             # Last state of each garage door
             door_states = dict()
