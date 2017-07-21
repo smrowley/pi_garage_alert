@@ -195,19 +195,19 @@ def doorTrigger():
         response = 'unknown command'
         if received == 'trigger':
             if state == 'open':
-                response == ('closing garage door')
+                response = ('closing garage door')
             else:
-                response == ('opening garage door')
+                response = ('opening garage door')
         elif received == 'open':
             if state == 'open':
-                response == ('garage door already open')
+                response = ('garage door already open')
             else:
-                response == ('opening garage door')
+                response = ('opening garage door')
         elif received == 'close':
             if state == 'open':
-                response == ('closing garage door')
+                response = ('closing garage door')
             else:
-                response == ('garage door alredy closed')
+                response = ('garage door alredy closed')
 
         conn.send_bytes(response)
         print 'Received command to ' + received + ' the garage door. Response was ' + response
