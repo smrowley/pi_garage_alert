@@ -179,10 +179,12 @@ def rpi_status():
 ##############################################################################
 # Trigger garage door to open or close
 ##############################################################################
-def doorTrigger():
+
+def doorTriggerLoop():
 
     for door in cfg.GARAGE_DOORS:
         state = get_garage_door_state(door['pin'])
+        status = get_home_away_status()
 
     address = (cfg.NETWORK_IP, int(cfg.NETWORK_PORT))
     listener = Listener(address, authkey='secret password')
@@ -195,19 +197,27 @@ def doorTrigger():
         response = 'unknown command'
         if received == 'trigger':
             if state == 'open':
-                response = ('closing garage door')
+                response = 'closing garage door'
             else:
-                response = ('opening garage door')
+                response = 'opening garage door'
         elif received == 'open':
             if state == 'open':
-                response = ('garage door already open')
+                response = 'garage door already open'
             else:
-                response = ('opening garage door')
+                response = 'opening garage door'
         elif received == 'close':
             if state == 'open':
-                response = ('closing garage door')
+                response = 'closing garage door'
             else:
-                response = ('garage door alredy closed')
+                response = 'garage door alredy closed'
+        elif received == 'state':
+            response = 'the garage door is' + state
+        elif received == 'home':
+            HOMEAWAY = 'home'
+            response = 'alert status set to HOME'
+        elif received == 'away':
+            HOMEAWAY = 'away'
+            response = 'alert status set to AWAY'
 
         conn.send_bytes(response)
         print 'Received command to ' + received + ' the garage door. Response was ' + response
@@ -309,7 +319,7 @@ class PiGarageAlert(object):
 
             # Banner
             self.logger.info("==========================================================")
-            self.logger.info("Pi Garage Listener and Alert starting")
+            self.logger.info("Pi Garage Listener and Alert Starting")
 
             # Use Raspberry Pi board pin numbers
             self.logger.info("Configuring global settings")
@@ -320,8 +330,10 @@ class PiGarageAlert(object):
                 self.logger.info("Configuring pin %d for \"%s\"", door['pin'], door['name'])
                 GPIO.setup(door['pin'], GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+            STATUS = 'home'
+
             # Start garage door trigger thread
-            doorTriggerThread = threading.Thread(target=doorTrigger)
+            doorTriggerThread = threading.Thread(target=doorTriggerLoop)
             doorTriggerThread.setDaemon(True)
             doorTriggerThread.start()
 
@@ -383,18 +395,23 @@ class PiGarageAlert(object):
                         time_of_day = int(datetime.now().strftime("%H"))
                         start_time = alert['start']
                         end_time = alert['end']
+                        send_alert = False
 
+                        # If system is set to away and the door is a open send an alert
+                        if HOMEAWAY == 'away' and state == 'open':
+                            send_alert = True
                         # Is start and end hours in the same day?
-                        if start_time < end_time:
+                        elif start_time < end_time:
                             # Is the current time within the start and end times and has the time elapsed and is this the state to trigger the alert?
                             if time_of_day >= start_time and time_of_day <= end_time and time_in_state > alert['time'] and state == alert['state']:
-                                send_alerts(self.logger, alert_senders, alert['recipients'], name, "%s has been %s for %d seconds!" % (name, state, time_in_state), state, time_in_state)
-                                alert_states[name] += 1
-                        else:
+                                send_alert = True
+                        elif start_time > end_time:
                             if time_of_day >= start_time or time_of_day <= end_time and time_in_state > alert['time'] and state == alert['state']:
-                                send_alerts(self.logger, alert_senders, alert['recipients'], name, "%s has been %s for %d seconds!" % (name, state, time_in_state), state, time_in_state)
-                                alert_states[name] += 1
+                                send_alert = True
 
+                        if send_alert:
+                            send_alerts(self.logger, alert_senders, alert['recipients'], name, "%s has been %s for %d seconds!" % (name, state, time_in_state), state, time_in_state)
+                            alert_states[name] += 1
 
                 # Periodically log the status for debug and ensuring RPi doesn't get too hot
                 status_report_countdown -= 1

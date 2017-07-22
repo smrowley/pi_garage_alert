@@ -38,7 +38,7 @@ GARAGE_DOORS = [
             },
             {
                 'state': 'open',
-                'time': 600,
+                'time': 7200,
                 'start': 0,
                 'end': 23,
                 'recipients': [ 'ifttt:garage_event' ]
@@ -46,6 +46,12 @@ GARAGE_DOORS = [
         ]
     }
 ]
+##############################################################################
+# Home and away setting. Set it to away with the app when you are on vacation
+# to trigger an alert immediately if the garage door is open.
+# Default setting on startup is home
+##############################################################################
+HOMEAWAY = ''
 
 # All messages will be logged to stdout and this file
 LOG_FILENAME = "/var/log/pi_garage_alert.log"
