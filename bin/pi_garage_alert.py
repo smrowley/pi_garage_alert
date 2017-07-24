@@ -195,7 +195,10 @@ def doorTriggerLoop():
 
         received = conn.recv_bytes()
         response = 'unknown command'
+        trigger = False
+
         if received == 'trigger':
+            trigger = True
             if state == 'open':
                 response = 'closing garage door'
             else:
@@ -205,9 +208,11 @@ def doorTriggerLoop():
                 response = 'garage door already open'
             else:
                 response = 'opening garage door'
+                trigger = True
         elif received == 'close':
             if state == 'open':
                 response = 'closing garage door'
+                trigger = True
             else:
                 response = 'garage door alredy closed'
         elif received == 'state':
@@ -222,6 +227,12 @@ def doorTriggerLoop():
         conn.send_bytes(response)
         print 'Received command to ' + received + ' the garage door. Response was ' + response
 
+        if trigger:
+#            GPIO.setup('7', GPIO.OUT)
+            print 'Door triggered'
+
+#        GPIO.setup('7', GPIO.IN)
+        trigger = False
         time.sleep(1)
 
     conn.close()
@@ -330,6 +341,9 @@ class PiGarageAlert(object):
                 self.logger.info("Configuring pin %d for \"%s\"", door['pin'], door['name'])
                 GPIO.setup(door['pin'], GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+            # Configure the sensor pin for the relay to open and close the garage door
+#            GPIO.setup('7', GPIO.IN)
+
             STATUS = 'home'
 
             # Start garage door trigger thread
@@ -433,7 +447,7 @@ class PiGarageAlert(object):
             logging.critical("Terminating due to unexpected error: %s", sys.exc_info()[0])
             logging.critical("%s", traceback.format_exc())
 
-        GPIO.cleanup() # pylint: disable=no-member
+        GPIO.cleanup()
 
 if __name__ == "__main__":
     PiGarageAlert().main()
