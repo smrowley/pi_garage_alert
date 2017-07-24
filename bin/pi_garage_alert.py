@@ -184,7 +184,7 @@ def doorTriggerLoop():
 
     for door in cfg.GARAGE_DOORS:
         state = get_garage_door_state(door['pin'])
-        status = get_home_away_status()
+        status = cfg.HOMEAWAY
 
     address = (cfg.NETWORK_IP, int(cfg.NETWORK_PORT))
     listener = Listener(address, authkey='secret password')
@@ -218,10 +218,10 @@ def doorTriggerLoop():
         elif received == 'state':
             response = 'the garage door is' + state
         elif received == 'home':
-            HOMEAWAY = 'home'
+            cfg.HOMEAWAY = 'home'
             response = 'alert status set to HOME'
         elif received == 'away':
-            HOMEAWAY = 'away'
+            cfg.HOMEAWAY = 'away'
             response = 'alert status set to AWAY'
 
         conn.send_bytes(response)
@@ -412,7 +412,7 @@ class PiGarageAlert(object):
                         send_alert = False
 
                         # If system is set to away and the door is a open send an alert
-                        if HOMEAWAY == 'away' and state == 'open':
+                        if cfg.HOMEAWAY == 'away' and state == 'open':
                             send_alert = True
                         # Is start and end hours in the same day?
                         elif start_time < end_time:
