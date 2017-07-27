@@ -1,8 +1,10 @@
-FROM resin/rpi-raspbian:jessie
+FROM resin/rpi-raspbian
 
-RUN cp etc/pi_garage_alert_config.py /usr/local/etc/ && \
-    cp bin/pi_garage_alert.py /usr/local/sbin/ && \
-    chmod u+x /usr/local/sbin/pi_garage_alert.py /usr/local/etc/pi_garage_alert_config.py
+COPY etc/pi_garage_alert_config.py /usr/local/etc/
+COPY bin/pi_garage_alert.py /usr/local/sbin/
+
+RUN chmod +x /usr/local/sbin/pi_garage_alert.py && \
+    chmod +x /usr/local/etc/pi_garage_alert_config.py
 
 EXPOSE 6000
 
