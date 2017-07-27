@@ -7,7 +7,7 @@ RUN chmod +x /usr/local/sbin/pi_garage_alert.py && \
     chmod +x /usr/local/etc/pi_garage_alert_config.py
 
 RUN apt-get update && \
-    apt-get install python3
+    apt-get install python
 
 EXPOSE 6000
 
